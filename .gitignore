@@ -427,3 +427,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Web project
+node_modules/
+.netlify/
+deno.lock
+dist/
+.husky/_/
+lighthouse-report.html

@@ -1,0 +1,93 @@
+/* ==========================================================================
+   conflicts.css — Conflict summary panel and conflict badge styles
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Conflict panel — role="alert" for screen reader announcements
+   -------------------------------------------------------------------------- */
+
+.conflict-panel {
+  background-color: #fffbeb;
+  border-block-end: 1px solid #fde68a;
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.conflict-panel[hidden] {
+  display: none;
+}
+
+.conflict-panel-header {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+}
+
+.conflict-panel-title {
+  color: #92400e;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.conflict-panel-title--error {
+  color: #991b1b;
+}
+
+.conflict-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* --------------------------------------------------------------------------
+   Individual conflict items
+   -------------------------------------------------------------------------- */
+
+.conflict-item {
+  align-items: flex-start;
+  display: flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-2);
+}
+
+.conflict-item-icon {
+  flex-shrink: 0;
+  margin-block-start: 1px;
+}
+
+.conflict-item-icon svg {
+  block-size: 14px;
+  display: block;
+  inline-size: 14px;
+}
+
+.conflict-item--error .conflict-item-icon {
+  color: var(--color-accent-red);
+}
+
+.conflict-item--warning .conflict-item-icon {
+  color: var(--color-accent-amber);
+}
+
+.conflict-item-body {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.conflict-item-message {
+  color: var(--color-text-primary);
+}
+
+.conflict-link {
+  color: var(--color-accent-teal);
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  margin-inline-start: var(--space-2);
+  text-decoration: underline;
+}
+
+.conflict-link:hover {
+  text-decoration: none;
+}

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shiftboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/grid.css" />
+    <link rel="stylesheet" href="css/sidebar.css" />
+    <link rel="stylesheet" href="css/conflicts.css" />
+    <link rel="stylesheet" href="css/print.css" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+    <!-- Heroicon SVG templates — inlined to avoid CDN CORS issues with inline SVG use -->
+    <template id="icon-plus-circle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-pencil">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+        />
+        <path
+          d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+        />
+      </svg>
+    </template>
+    <template id="icon-trash">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-calendar">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+        />
+        <path
+          fill-rule="evenodd"
+          d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-cog">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-chevron-left">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-chevron-right">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M16.28 11.47a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 0 1-1.06-1.06L14.69 12 7.72 4.03a.75.75 0 0 1 1.06-1.06l7.5 7.5Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-x-circle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-exclamation-triangle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-check-circle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-printer">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M7.875 1.5C6.839 1.5 6 2.34 6 3.375v2.99c-.426.053-.851.11-1.274.174-1.454.218-2.476 1.483-2.476 2.917v6.294a3 3 0 0 0 3 3h.27l-.155 1.705A1.875 1.875 0 0 0 7.232 22.5h9.536a1.875 1.875 0 0 0 1.867-2.045l-.155-1.705h.27a3 3 0 0 0 3-3V9.456c0-1.434-1.022-2.7-2.476-2.917A48.716 48.716 0 0 0 18 6.366V3.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM16.5 6.205v-2.83A.375.375 0 0 0 16.125 3h-8.25a.375.375 0 0 0-.375.375v2.83a49.353 49.353 0 0 1 9 0Zm-.217 8.265c.178.018.317.16.333.337l.526 5.784a.375.375 0 0 1-.374.409H7.232a.375.375 0 0 1-.374-.409l.526-5.784a.373.373 0 0 1 .333-.337 41.741 41.741 0 0 1 9.566 0Zm.967-3.97a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H18a.75.75 0 0 1-.75-.75V10.5ZM15 9.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-.75-.75H15Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-clipboard">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10.5 3A1.501 1.501 0 0 0 9 4.5h6A1.5 1.5 0 0 0 13.5 3h-3Zm-2.693.178A3 3 0 0 1 10.5 1.5h3a3 3 0 0 1 2.694 1.678c.497.042.992.092 1.486.15 1.497.173 2.57 1.46 2.57 2.929V19.5a3 3 0 0 1-3 3H6.75a3 3 0 0 1-3-3V6.257c0-1.47 1.073-2.756 2.57-2.93.493-.057.989-.107 1.487-.15Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-star">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+    <template id="icon-x-mark">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <!-- Screen reader announcement region for drag-and-drop -->
+    <div id="dnd-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" aria-label="Employees and settings">
+        <header class="sidebar-header">
+          <h1 class="app-title">Shiftboard</h1>
+          <button
+            class="btn-icon"
+            id="btn-add-employee"
+            aria-label="Add employee"
+            type="button"
+          ></button>
+        </header>
+
+        <div class="sidebar-search">
+          <label for="employee-search" class="sr-only">Search employees</label>
+          <input
+            type="search"
+            id="employee-search"
+            class="search-input"
+            placeholder="Search by name or role…"
+            autocomplete="off"
+          />
+        </div>
+
+        <ul class="employee-list" id="employee-list">
+          <!-- Populated by js/employees.js -->
+        </ul>
+
+        <!-- Sidebar drop zone for removing employees from the schedule -->
+        <section
+          class="sidebar-drop-zone"
+          id="sidebar-drop-zone"
+          aria-label="Drop here to remove employee from schedule"
+        >
+          <span class="drop-zone-label" aria-hidden="true">Remove from schedule</span>
+        </section>
+
+        <nav class="sidebar-nav" aria-label="Application navigation">
+          <button class="nav-item" id="btn-settings" type="button">
+            <span class="nav-icon" aria-hidden="true"></span>
+            Settings
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Main content -->
+      <main id="main" class="main-content" tabindex="-1">
+        <!-- Week navigation header -->
+        <header class="week-header">
+          <div class="week-nav">
+            <button
+              class="btn-icon"
+              id="btn-prev-week"
+              aria-label="Previous week"
+              type="button"
+            ></button>
+            <h2 class="week-label" id="week-label" aria-live="polite" aria-atomic="true">
+              Loading…
+            </h2>
+            <button
+              class="btn-icon"
+              id="btn-next-week"
+              aria-label="Next week"
+              type="button"
+            ></button>
+          </div>
+          <div class="week-actions">
+            <button class="btn-secondary" id="btn-today" type="button">Today</button>
+            <button class="btn-secondary" id="btn-copy-summary" type="button">
+              <span class="btn-icon-inline" aria-hidden="true"></span>
+              Copy summary
+            </button>
+            <button class="btn-secondary" id="btn-print" type="button">
+              <span class="btn-icon-inline" aria-hidden="true"></span>
+              Print
+            </button>
+          </div>
+        </header>
+
+        <!-- Conflict alert panel — role="alert" so screen readers announce on change -->
+        <div
+          class="conflict-panel"
+          id="conflict-panel"
+          role="alert"
+          aria-live="assertive"
+          aria-label="Schedule conflicts"
+          hidden
+        >
+          <!-- Populated by js/conflicts.js -->
+        </div>
+
+        <!-- Schedule grid -->
+        <div class="grid-wrapper">
+          <section class="schedule-grid" id="schedule-grid" aria-label="Weekly schedule">
+            <!-- Populated by js/grid.js -->
+          </section>
+        </div>
+
+        <!-- Empty state — shown when no employees exist -->
+        <div class="empty-state" id="empty-state" hidden>
+          <p class="empty-state-title">No employees yet</p>
+          <p class="empty-state-body">Add your first employee to start building the schedule.</p>
+          <button class="btn-primary" id="btn-add-employee-empty" type="button">
+            Add employee
+          </button>
+        </div>
+
+        <!-- Narrow viewport message -->
+        <div class="narrow-message" aria-live="polite" role="status" hidden>
+          <p>Schedule management requires a wider screen (768px or wider).</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Employee add/edit modal -->
+    <dialog id="modal-employee" aria-labelledby="modal-employee-title">
+      <div class="modal-inner">
+        <div class="modal-header">
+          <h2 id="modal-employee-title" class="modal-title">Add employee</h2>
+          <button
+            class="btn-icon modal-close"
+            data-close-modal="modal-employee"
+            aria-label="Close"
+            type="button"
+          ></button>
+        </div>
+        <form id="form-employee" class="modal-form" novalidate>
+          <div class="form-field">
+            <label for="field-emp-name">Name <span aria-hidden="true">*</span></label>
+            <input type="text" id="field-emp-name" name="name" required autocomplete="off" />
+            <span class="field-error" id="error-emp-name" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-field">
+            <label for="field-emp-role">Role / Title <span aria-hidden="true">*</span></label>
+            <input type="text" id="field-emp-role" name="role" required autocomplete="off" />
+            <span class="field-error" id="error-emp-role" role="alert" aria-live="polite"></span>
+          </div>
+          <fieldset class="form-field">
+            <legend>Color</legend>
+            <div
+              class="color-swatches"
+              id="color-swatches"
+              role="radiogroup"
+              aria-label="Employee color"
+            >
+              <!-- Populated by js/employees.js -->
+            </div>
+          </fieldset>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" data-close-modal="modal-employee">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary" id="btn-save-employee">Save employee</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Availability matrix modal -->
+    <dialog id="modal-availability" aria-labelledby="modal-availability-title">
+      <div class="modal-inner modal-inner--wide">
+        <div class="modal-header">
+          <h2 id="modal-availability-title" class="modal-title">Set availability</h2>
+          <button
+            class="btn-icon modal-close"
+            data-close-modal="modal-availability"
+            aria-label="Close"
+            type="button"
+          ></button>
+        </div>
+        <p class="modal-subtitle" id="modal-availability-subtitle"></p>
+        <p class="avail-legend">
+          Click a cell to cycle:
+          <span class="avail-badge avail-available">Available</span>
+          <span class="avail-badge avail-preferred">Preferred</span>
+          <span class="avail-badge avail-unavailable">Unavailable</span>
+        </p>
+        <div class="avail-table-wrapper">
+          <table class="avail-matrix" id="avail-matrix" aria-label="Weekly availability">
+            <thead>
+              <tr>
+                <th scope="col">Day</th>
+                <th scope="col">Morning</th>
+                <th scope="col">Afternoon</th>
+                <th scope="col">Evening</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Populated by js/employees.js -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" data-close-modal="modal-availability">
+            Cancel
+          </button>
+          <button type="button" class="btn-primary" id="btn-save-availability">
+            Save availability
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Settings modal -->
+    <dialog id="modal-settings" aria-labelledby="modal-settings-title">
+      <div class="modal-inner">
+        <div class="modal-header">
+          <h2 id="modal-settings-title" class="modal-title">Settings</h2>
+          <button
+            class="btn-icon modal-close"
+            data-close-modal="modal-settings"
+            aria-label="Close"
+            type="button"
+          ></button>
+        </div>
+        <form id="form-settings" class="modal-form">
+          <div class="form-field">
+            <label for="field-min-headcount">Minimum staff per shift</label>
+            <input
+              type="number"
+              id="field-min-headcount"
+              name="minHeadcount"
+              min="0"
+              max="20"
+              step="1"
+              value="1"
+            />
+            <span class="field-hint"
+              >Shifts with fewer employees than this will show a warning.</span
+            >
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" data-close-modal="modal-settings">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary">Save settings</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- idb-keyval: UMD build exposes window.idbKeyval -->
+    <script src="https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/employees.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/conflicts.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/drag.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

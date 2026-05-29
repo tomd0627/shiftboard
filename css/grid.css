@@ -1,0 +1,232 @@
+/* ==========================================================================
+   grid.css — Weekly schedule grid: columns, rows, cells, conflict states
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Grid wrapper and scroll container
+   -------------------------------------------------------------------------- */
+
+.grid-wrapper {
+  flex: 1;
+  min-block-size: 0;
+  overflow: auto;
+  padding: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Schedule grid — 8 columns (row label + 7 days), 4 rows (col label + 3 blocks)
+   -------------------------------------------------------------------------- */
+
+.schedule-grid {
+  background-color: var(--color-grid-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(100px, 1fr));
+  grid-template-rows: auto repeat(3, minmax(80px, auto));
+  min-inline-size: 760px;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Column headers — day names (Mon–Sun)
+   -------------------------------------------------------------------------- */
+
+.grid-col-header {
+  border-block-end: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.grid-col-header:first-child {
+  background-color: var(--color-sidebar-surface);
+}
+
+.grid-col-header[data-today='true'] {
+  background-color: #f0fdfa;
+  border-block-end-color: var(--color-accent-teal);
+  border-block-end-width: 2px;
+  color: var(--color-accent-teal);
+}
+
+.grid-col-header .col-date {
+  color: var(--color-text-muted);
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-block-start: 2px;
+  text-transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Row headers — block names (Morning / Afternoon / Evening)
+   -------------------------------------------------------------------------- */
+
+.grid-row-header {
+  align-items: center;
+  background-color: var(--color-sidebar-surface);
+  border-block-end: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: flex;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  justify-content: flex-end;
+  letter-spacing: 0.05em;
+  padding: var(--space-2) var(--space-3);
+  text-align: end;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Grid cells — schedule slots
+   -------------------------------------------------------------------------- */
+
+.grid-cell {
+  background-color: var(--color-grid-surface);
+  border-block-end: 1px solid var(--color-border);
+  border-inline-end: 1px solid var(--color-border);
+  min-block-size: 80px;
+  padding: var(--space-2);
+  position: relative;
+  transition: background-color 100ms ease;
+}
+
+/* Last column: remove right border */
+.grid-cell:nth-child(8n) {
+  border-inline-end: none;
+}
+
+/* Today column highlight */
+.grid-cell[data-today='true'] {
+  background-color: #f0fdfa;
+  border-inline-start: 2px solid var(--color-accent-teal);
+}
+
+/* --------------------------------------------------------------------------
+   Drag states
+   -------------------------------------------------------------------------- */
+
+.grid-cell.drag-over {
+  background-color: #e0f2fe;
+  border: 2px dashed var(--color-accent-teal);
+}
+
+.grid-cell.drag-source {
+  opacity: 0.5;
+}
+
+/* --------------------------------------------------------------------------
+   Conflict states
+   -------------------------------------------------------------------------- */
+
+.grid-cell.conflict-error {
+  background-color: #fef2f2;
+}
+
+.grid-cell.conflict-warning {
+  background-color: #fffbeb;
+}
+
+/* Conflict icon badge — top-right corner of cell */
+.cell-conflict-badge {
+  inset-block-start: var(--space-1);
+  inset-inline-end: var(--space-1);
+  position: absolute;
+}
+
+.cell-conflict-badge svg {
+  block-size: 16px;
+  display: block;
+  inline-size: 16px;
+}
+
+.grid-cell.conflict-error .cell-conflict-badge {
+  color: var(--color-accent-red);
+}
+
+.grid-cell.conflict-warning .cell-conflict-badge {
+  color: var(--color-accent-amber);
+}
+
+/* --------------------------------------------------------------------------
+   Employee chips inside grid cells
+   -------------------------------------------------------------------------- */
+
+.cell-chips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.chip {
+  align-items: center;
+  border: 2px solid rgb(0 0 0 / 12%);
+  border-radius: var(--radius-full);
+  color: #fff;
+  cursor: grab;
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  gap: var(--space-1);
+  max-inline-size: 100%;
+  overflow: hidden;
+  padding: 3px var(--space-2) 3px 3px;
+  position: relative;
+  transition: opacity 150ms ease;
+  user-select: none;
+}
+
+.chip:active {
+  cursor: grabbing;
+}
+
+.chip-dot {
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  inline-size: 8px;
+}
+
+.chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Keyboard-pickup active state */
+.chip.keyboard-active {
+  box-shadow: var(--focus-ring);
+  outline: 2px solid var(--color-accent-teal);
+  outline-offset: 2px;
+}
+
+/* Sidebar chips (in employee list) — larger, full name visible */
+.employee-chip {
+  align-items: center;
+  border: 2px solid rgb(0 0 0 / 12%);
+  border-radius: var(--radius-full);
+  color: #fff;
+  cursor: grab;
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  gap: var(--space-2);
+  overflow: hidden;
+  padding: 4px var(--space-3) 4px var(--space-2);
+}
+
+.employee-chip:active {
+  cursor: grabbing;
+}
+
+.employee-chip .chip-dot {
+  block-size: 10px;
+  inline-size: 10px;
+}

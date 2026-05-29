@@ -1,0 +1,195 @@
+/* ==========================================================================
+   sidebar.css — Left sidebar: header, search, employee list, drop zone, nav
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Sidebar panel
+   -------------------------------------------------------------------------- */
+
+.sidebar {
+  background-color: var(--color-sidebar-surface);
+  border-inline-end: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar header — title + add button
+   -------------------------------------------------------------------------- */
+
+.sidebar-header {
+  align-items: center;
+  border-block-end: 1px solid var(--color-border);
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: var(--space-4);
+}
+
+.app-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   Search input
+   -------------------------------------------------------------------------- */
+
+.sidebar-search {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.search-input {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  inline-size: 100%;
+  padding: var(--space-2) var(--space-3);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--color-accent-teal);
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   Employee list
+   -------------------------------------------------------------------------- */
+
+.employee-list {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-3);
+}
+
+.employee-list-item {
+  align-items: center;
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  transition: background-color 100ms ease;
+}
+
+.employee-list-item:hover {
+  background-color: var(--color-bg);
+}
+
+.employee-list-item .employee-info {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.employee-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.employee-role {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.employee-actions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.employee-list-item:hover .employee-actions,
+.employee-list-item:focus-within .employee-actions {
+  opacity: 1;
+}
+
+.nav-icon svg {
+  block-size: 16px;
+  inline-size: 16px;
+}
+
+.employee-actions .btn-icon svg {
+  block-size: 14px;
+  inline-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar drop zone — drag employee chips here to remove from schedule
+   -------------------------------------------------------------------------- */
+
+.sidebar-drop-zone {
+  align-items: center;
+  background-color: var(--color-bg);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: default;
+  display: flex;
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  justify-content: center;
+  margin: var(--space-3);
+  min-block-size: 48px;
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  text-transform: uppercase;
+  transition: background-color 100ms ease;
+}
+
+.sidebar-drop-zone.drag-over {
+  background-color: var(--color-unavail-bg);
+  border-color: var(--color-accent-red);
+  color: #9f1239;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar navigation
+   -------------------------------------------------------------------------- */
+
+.sidebar-nav {
+  border-block-start: 1px solid var(--color-border);
+  flex-shrink: 0;
+  padding: var(--space-3);
+}
+
+.nav-item {
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  display: flex;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  gap: var(--space-2);
+  inline-size: 100%;
+  padding: var(--space-2) var(--space-3);
+  transition: background-color 100ms ease;
+}
+
+.nav-item:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.nav-icon {
+  align-items: center;
+  display: inline-flex;
+}

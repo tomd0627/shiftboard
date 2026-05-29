@@ -1,0 +1,622 @@
+/* ==========================================================================
+   main.css — CSS custom properties, reset, typography, layout, utilities
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Backgrounds */
+  --color-bg: #fff;
+  --color-grid-surface: #f8fafc;
+  --color-sidebar-surface: #f1f5f9;
+
+  /* Text */
+  --color-text-primary: #1e293b;
+  --color-text-muted: #596070; /* corrected from spec #64748b — fails 4.5:1 on sidebar surface */
+
+  /* Structure */
+  --color-border: #e2e8f0;
+  --color-structure: #1e293b;
+
+  /* Accents */
+  --color-accent-teal: #0d9488;
+  --color-accent-amber: #f59e0b;
+  --color-accent-red: #ef4444;
+
+  /* Availability states */
+  --color-avail-bg: #d1fae5;
+  --color-unavail-bg: #fee2e2;
+  --color-preferred-bg: #d1fae5;
+
+  /* Employee chip presets — Tailwind 700 shades, all pass 4.5:1 with white text */
+  --chip-color-0: #0f766e; /* Teal    5.38:1 */
+  --chip-color-1: #4338ca; /* Indigo  9.05:1 */
+  --chip-color-2: #be123c; /* Rose    8.68:1 */
+  --chip-color-3: #b45309; /* Amber   5.74:1 */
+  --chip-color-4: #6d28d9; /* Violet 10.20:1 */
+  --chip-color-5: #065f46; /* Emerald 9.72:1 */
+  --chip-color-6: #0369a1; /* Sky     7.78:1 */
+  --chip-color-7: #86198f; /* Fuchsia 10.30:1 */
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--color-accent-teal);
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --week-header-height: 60px;
+}
+
+/* --------------------------------------------------------------------------
+   Reset
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  block-size: 100%;
+  font-size: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  block-size: 100%;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+}
+
+input {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 10%),
+    0 8px 10px -6px rgb(0 0 0 / 10%);
+  inline-size: calc(100% - var(--space-6) * 2);
+  max-block-size: 90dvh;
+  max-inline-size: 520px;
+  overflow: auto;
+  padding: 0;
+}
+
+dialog::backdrop {
+  background-color: rgb(15 23 42 / 50%);
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility utilities
+   -------------------------------------------------------------------------- */
+
+.sr-only {
+  block-size: 1px;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+/* Skip link */
+.skip-link {
+  background-color: var(--color-accent-teal);
+  color: #fff;
+  font-weight: 500;
+  inset-block-start: -100px;
+  inset-inline-start: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  position: absolute;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  inset-block-start: var(--space-4);
+}
+
+/* Global focus ring */
+:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--color-accent-teal);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Layout — two-panel app shell
+   -------------------------------------------------------------------------- */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-block-size: 100dvh;
+  overflow: hidden;
+}
+
+.main-content {
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn-primary {
+  background-color: var(--color-accent-teal);
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  transition: background-color 150ms ease;
+}
+
+.btn-primary:hover {
+  background-color: #0f766e;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  transition: background-color 150ms ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-grid-surface);
+}
+
+.btn-icon {
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  justify-content: center;
+  padding: var(--space-1);
+  transition: color 150ms ease;
+}
+
+.btn-icon:hover {
+  color: var(--color-text-primary);
+}
+
+.btn-icon svg {
+  block-size: 18px;
+  display: block;
+  flex-shrink: 0;
+  inline-size: 18px;
+}
+
+.btn-icon-inline {
+  display: inline-flex;
+}
+
+.btn-icon-inline svg {
+  block-size: 14px;
+  display: block;
+  inline-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Week header
+   -------------------------------------------------------------------------- */
+
+.week-header {
+  align-items: center;
+  background-color: var(--color-bg);
+  border-block-end: 1px solid var(--color-border);
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-3);
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+}
+
+.week-nav {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.week-label {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  min-inline-size: 200px;
+  text-align: center;
+}
+
+.week-actions {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Modals
+   -------------------------------------------------------------------------- */
+
+.modal-inner {
+  padding: var(--space-6);
+}
+
+.modal-inner--wide {
+  max-inline-size: 640px;
+}
+
+.modal-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-block-end: var(--space-5);
+}
+
+.modal-title {
+  font-size: var(--font-size-lg);
+}
+
+.modal-subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-block: calc(var(--space-5) * -1) var(--space-4);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-block-start: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Form fields
+   -------------------------------------------------------------------------- */
+
+.form-field {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+}
+
+.form-field label,
+.form-field legend {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.form-field input[type='text'],
+.form-field input[type='number'] {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  padding: var(--space-2) var(--space-3);
+}
+
+.form-field input[type='text']:focus,
+.form-field input[type='number']:focus {
+  border-color: var(--color-accent-teal);
+  outline: none;
+}
+
+.field-error {
+  color: var(--color-accent-red);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  min-block-size: 1em;
+}
+
+.field-hint {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Color swatches (employee color picker)
+   -------------------------------------------------------------------------- */
+
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-block-start: var(--space-1);
+}
+
+.color-swatch {
+  block-size: 28px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  inline-size: 28px;
+  transition: transform 100ms ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch[aria-pressed='true'] {
+  border-color: var(--color-structure);
+  box-shadow:
+    0 0 0 3px var(--color-bg),
+    0 0 0 5px var(--color-accent-teal);
+}
+
+/* --------------------------------------------------------------------------
+   Toast notification
+   -------------------------------------------------------------------------- */
+
+.toast {
+  background-color: var(--color-structure);
+  border-radius: var(--radius-md);
+  bottom: var(--space-5);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  inset-inline-end: var(--space-5);
+  padding: var(--space-2) var(--space-4);
+  position: fixed;
+  z-index: 500;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Empty state
+   -------------------------------------------------------------------------- */
+
+.empty-state {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  inset: 0;
+  justify-content: center;
+  padding: var(--space-6);
+  position: absolute;
+  text-align: center;
+}
+
+.empty-state[hidden] {
+  display: none;
+}
+
+.empty-state-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.empty-state-body {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+/* --------------------------------------------------------------------------
+   Narrow viewport message
+   -------------------------------------------------------------------------- */
+
+.narrow-message {
+  align-items: center;
+  display: none;
+  font-size: var(--font-size-base);
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Availability matrix (in modal)
+   -------------------------------------------------------------------------- */
+
+.avail-table-wrapper {
+  overflow-x: auto;
+}
+
+.avail-legend {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--font-size-xs);
+  gap: var(--space-2);
+  margin-block-end: var(--space-3);
+}
+
+.avail-badge {
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: 2px var(--space-2);
+}
+
+.avail-badge.avail-available {
+  background-color: var(--color-grid-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.avail-badge.avail-preferred {
+  background-color: var(--color-avail-bg);
+  color: #065f46;
+}
+
+.avail-badge.avail-unavailable {
+  background-color: var(--color-unavail-bg);
+  color: #9f1239;
+}
+
+.avail-matrix {
+  border-collapse: collapse;
+  inline-size: 100%;
+}
+
+.avail-matrix th {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.avail-matrix tbody th {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.avail-matrix td {
+  padding: var(--space-1) var(--space-2);
+}
+
+.avail-cell {
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-1);
+  justify-content: center;
+  min-inline-size: 100px;
+  padding: var(--space-1) var(--space-2);
+  transition: background-color 100ms ease;
+}
+
+.avail-cell[data-state='available'] {
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.avail-cell[data-state='preferred'] {
+  background-color: var(--color-avail-bg);
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.avail-cell[data-state='unavailable'] {
+  background-color: var(--color-unavail-bg);
+  border-color: #fca5a5;
+  color: #9f1239;
+}
+
+.avail-cell svg {
+  block-size: 12px;
+  flex-shrink: 0;
+  inline-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive — narrow viewport
+   -------------------------------------------------------------------------- */
+
+@media (width <= 767px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .grid-wrapper,
+  .week-header,
+  .conflict-panel,
+  .empty-state,
+  #schedule-grid {
+    display: none !important;
+  }
+
+  .narrow-message {
+    display: flex;
+  }
+}

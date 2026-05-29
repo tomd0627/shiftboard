@@ -1,0 +1,107 @@
+/* ==========================================================================
+   print.css — Print stylesheet: removes UI chrome, forces B&W legible grid
+   ========================================================================== */
+
+@media print {
+  /* Remove all UI chrome */
+  .sidebar,
+  .conflict-panel,
+  .week-actions,
+  .skip-link,
+  .sidebar-drop-zone,
+  .narrow-message,
+  .empty-state,
+  dialog,
+  #toast,
+  #dnd-announcer,
+  .cell-conflict-badge {
+    display: none !important;
+  }
+
+  /* Full-width layout */
+  .app-shell {
+    display: block;
+    min-block-size: unset;
+  }
+
+  .main-content {
+    display: block;
+    overflow: visible;
+  }
+
+  /* Week header — keep label, remove nav buttons */
+  .week-header {
+    border: none;
+    display: block;
+    margin-block-end: 12pt;
+    padding: 0;
+  }
+
+  .week-nav .btn-icon {
+    display: none;
+  }
+
+  .week-label {
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: start;
+  }
+
+  /* Grid wrapper — no scroll, full width */
+  .grid-wrapper {
+    flex: none;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .schedule-grid {
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 0;
+    break-inside: avoid;
+    inline-size: 100%;
+    min-inline-size: unset;
+  }
+
+  /* Grid cells */
+  .grid-cell {
+    background-color: #fff !important;
+    border-color: #ccc;
+    break-inside: avoid;
+    min-block-size: 60pt;
+    padding: 4pt 6pt;
+  }
+
+  .grid-col-header,
+  .grid-row-header {
+    background-color: #f0f0f0 !important;
+    border-color: #ccc;
+    color: #000;
+  }
+
+  /* Chips — remove color, show name in black */
+  .chip {
+    background-color: #e8e8e8 !important;
+    border-color: #999;
+    border-radius: 3pt;
+    color: #000 !important;
+    cursor: default;
+    display: block;
+    padding: 2pt 4pt;
+  }
+
+  .chip-dot {
+    display: none;
+  }
+
+  /* Prevent chips from being dragged in print */
+  [draggable='true'] {
+    -webkit-user-drag: none;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 1.5cm;
+    size: landscape;
+  }
+}

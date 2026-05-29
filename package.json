@@ -1,0 +1,35 @@
+{
+  "name": "shiftboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Manager-facing shift scheduling and availability management tool",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "html-validate": "^9.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-order": "^6.0.0"
+  },
+  "lint-staged": {
+    "*.html": [
+      "html-validate",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}
