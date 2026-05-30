@@ -146,6 +146,7 @@
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   font-weight: 500;
+  gap: var(--space-2);
   justify-content: center;
   margin: var(--space-3);
   min-block-size: 48px;
@@ -153,6 +154,17 @@
   text-align: center;
   text-transform: uppercase;
   transition: background-color 100ms ease;
+}
+
+.drop-zone-icon {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.sidebar-drop-zone .drop-zone-icon svg {
+  block-size: 14px;
+  inline-size: 14px;
 }
 
 .sidebar-drop-zone.drag-over {
@@ -192,4 +204,14 @@
 .nav-icon {
   align-items: center;
   display: inline-flex;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive — narrow viewport
+   -------------------------------------------------------------------------- */
+
+@media (width <= 767px) {
+  .sidebar {
+    display: none;
+  }
 }

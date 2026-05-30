@@ -13,6 +13,11 @@
   padding: var(--space-3) var(--space-4);
 }
 
+.conflict-panel--error {
+  background-color: #fef2f2;
+  border-block-end-color: #fecaca;
+}
+
 .conflict-panel[hidden] {
   display: none;
 }
@@ -90,4 +95,53 @@
 
 .conflict-link:hover {
   text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   Grouped understaffed conflicts — collapsible
+   -------------------------------------------------------------------------- */
+
+.conflict-group {
+  align-items: flex-start;
+}
+
+.conflict-group-chevron svg {
+  block-size: 12px;
+  inline-size: 12px;
+  transition: transform 150ms ease;
+}
+
+.conflict-group-toggle {
+  align-items: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  gap: var(--space-1);
+}
+
+.conflict-group-toggle:hover {
+  color: #92400e;
+}
+
+.conflict-group-toggle[aria-expanded='true'] .conflict-group-chevron svg {
+  transform: rotate(90deg);
+}
+
+.conflict-subitem {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+}
+
+.conflict-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-block-start: var(--space-2);
+  padding-inline-start: var(--space-4);
+}
+
+.conflict-sublist[hidden] {
+  display: none;
 }

@@ -93,14 +93,24 @@
 
     if (summary.length === 0) {
       panel.hidden = true;
+      panel.classList.remove('conflict-panel--error');
       panel.innerHTML = '';
       return;
     }
 
     panel.hidden = false;
 
-    const hasErrors = summary.some((c) => c.severity === 'error');
-    const label = `${summary.length} conflict${summary.length !== 1 ? 's' : ''} found`;
+    const errors = summary.filter((c) => c.severity === 'error');
+    const warnings = summary.filter((c) => c.severity === 'warning');
+    const hasErrors = errors.length > 0;
+
+    panel.classList.toggle('conflict-panel--error', hasErrors);
+
+    // Header: "2 errors, 5 warnings" or "14 warnings"
+    const parts = [];
+    if (errors.length > 0) parts.push(`${errors.length} error${errors.length !== 1 ? 's' : ''}`);
+    if (warnings.length > 0)
+      parts.push(`${warnings.length} warning${warnings.length !== 1 ? 's' : ''}`);
 
     const header = document.createElement('div');
     header.className = 'conflict-panel-header';
@@ -110,55 +120,155 @@
     if (iconTpl) {
       const iconSpan = document.createElement('span');
       iconSpan.className = 'conflict-item-icon';
+      iconSpan.setAttribute('aria-hidden', 'true');
       iconSpan.appendChild(iconTpl.content.cloneNode(true));
       header.appendChild(iconSpan);
     }
 
     const title = document.createElement('span');
     title.className = `conflict-panel-title${hasErrors ? ' conflict-panel-title--error' : ''}`;
-    title.textContent = label;
+    title.textContent = parts.join(', ');
     header.appendChild(title);
 
     const list = document.createElement('ul');
     list.className = 'conflict-list';
 
-    summary.forEach((conflict) => {
-      const li = document.createElement('li');
-      li.className = `conflict-item conflict-item--${conflict.severity}`;
+    // Errors first
+    errors.forEach((conflict) => {
+      list.appendChild(buildConflictItem(conflict, employeeMap));
+    });
 
-      const iconSpan = document.createElement('span');
-      iconSpan.className = 'conflict-item-icon';
-      const icoId = conflict.severity === 'error' ? 'icon-x-circle' : 'icon-exclamation-triangle';
-      const icoTpl = document.getElementById(icoId);
-      if (icoTpl) iconSpan.appendChild(icoTpl.content.cloneNode(true));
+    // Availability violations and double-bookings as individual items
+    warnings
+      .filter((c) => c.type !== 'understaffed')
+      .forEach((c) => {
+        list.appendChild(buildConflictItem(c, employeeMap));
+      });
 
-      const body = document.createElement('span');
-      body.className = 'conflict-item-body';
+    // Understaffed: collapse into a group when there are more than 3
+    const understaffed = warnings.filter((c) => c.type === 'understaffed');
+    if (understaffed.length > 0) {
+      if (understaffed.length <= 3) {
+        understaffed.forEach((c) => {
+          list.appendChild(buildConflictItem(c, employeeMap));
+        });
+      } else {
+        list.appendChild(buildUnderstaffedGroup(understaffed));
+      }
+    }
 
-      const msg = document.createElement('span');
-      msg.className = 'conflict-item-message';
-      msg.textContent = buildConflictMessage(conflict, employeeMap);
-      body.appendChild(msg);
+    panel.innerHTML = '';
+    panel.appendChild(header);
+    panel.appendChild(list);
+  }
+
+  function buildConflictItem(conflict, employeeMap) {
+    const li = document.createElement('li');
+    li.className = `conflict-item conflict-item--${conflict.severity}`;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'conflict-item-icon';
+    iconSpan.setAttribute('aria-hidden', 'true');
+    const icoId = conflict.severity === 'error' ? 'icon-x-circle' : 'icon-exclamation-triangle';
+    const icoTpl = document.getElementById(icoId);
+    if (icoTpl) iconSpan.appendChild(icoTpl.content.cloneNode(true));
+
+    const body = document.createElement('div');
+    body.className = 'conflict-item-body';
+
+    const msg = document.createElement('span');
+    msg.className = 'conflict-item-message';
+    msg.textContent = buildConflictMessage(conflict, employeeMap);
+    body.appendChild(msg);
+
+    const link = document.createElement('a');
+    link.className = 'conflict-link';
+    link.href = '#';
+    link.textContent = 'Go to cell';
+    link.dataset.cellKey = conflict.cellKey;
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      scrollToCell(conflict.cellKey);
+    });
+    body.appendChild(link);
+
+    li.appendChild(iconSpan);
+    li.appendChild(body);
+    return li;
+  }
+
+  function buildUnderstaffedGroup(conflicts) {
+    const li = document.createElement('li');
+    li.className = 'conflict-item conflict-item--warning conflict-group';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'conflict-item-icon';
+    iconSpan.setAttribute('aria-hidden', 'true');
+    const icoTpl = document.getElementById('icon-exclamation-triangle');
+    if (icoTpl) iconSpan.appendChild(icoTpl.content.cloneNode(true));
+
+    const body = document.createElement('div');
+    body.className = 'conflict-item-body';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'conflict-group-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+
+    const toggleText = document.createElement('span');
+    toggleText.textContent = `${conflicts.length} shifts understaffed`;
+    toggle.appendChild(toggleText);
+
+    const chevTpl = document.getElementById('icon-chevron-right');
+    if (chevTpl) {
+      const chevSpan = document.createElement('span');
+      chevSpan.className = 'conflict-group-chevron';
+      chevSpan.setAttribute('aria-hidden', 'true');
+      chevSpan.appendChild(chevTpl.content.cloneNode(true));
+      toggle.appendChild(chevSpan);
+    }
+
+    const sublist = document.createElement('ul');
+    sublist.className = 'conflict-sublist';
+    sublist.hidden = true;
+
+    conflicts.forEach((c) => {
+      const subli = document.createElement('li');
+      subli.className = 'conflict-subitem';
+
+      const [day, block] = c.cellKey.split('_');
+      const dayLabel = day.charAt(0).toUpperCase() + day.slice(1);
+      const blockLabel = block.charAt(0).toUpperCase() + block.slice(1);
+
+      const textSpan = document.createElement('span');
+      textSpan.textContent = `${dayLabel} ${blockLabel}: ${c.count}/${c.minHeadcount} staff`;
 
       const link = document.createElement('a');
       link.className = 'conflict-link';
       link.href = '#';
       link.textContent = 'Go to cell';
-      link.dataset.cellKey = conflict.cellKey;
+      link.dataset.cellKey = c.cellKey;
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        scrollToCell(conflict.cellKey);
+        scrollToCell(c.cellKey);
       });
-      body.appendChild(link);
 
-      li.appendChild(iconSpan);
-      li.appendChild(body);
-      list.appendChild(li);
+      subli.appendChild(textSpan);
+      subli.appendChild(link);
+      sublist.appendChild(subli);
     });
 
-    panel.innerHTML = '';
-    panel.appendChild(header);
-    panel.appendChild(list);
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      sublist.hidden = expanded;
+    });
+
+    body.appendChild(toggle);
+    body.appendChild(sublist);
+    li.appendChild(iconSpan);
+    li.appendChild(body);
+    return li;
   }
 
   function buildConflictMessage(conflict, employeeMap) {
@@ -190,6 +300,15 @@
     if (!cell) return;
     cell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     cell.focus();
+    cell.classList.remove('cell-jump');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        cell.classList.add('cell-jump');
+        cell.addEventListener('animationend', () => cell.classList.remove('cell-jump'), {
+          once: true,
+        });
+      });
+    });
   }
 
   /* ------------------------------------------------------------------

@@ -4,6 +4,7 @@
      ------------------------------------------------------------------ */
 
   const dragState = {
+    availSlots: null, // employee's availability slots, cached when drag starts
     employeeId: null,
     phase: 'idle', // 'idle' | 'dragging' | 'keyboard_pickup'
     preSnapshot: null, // deep clone of weekCells taken BEFORE any mutation
@@ -77,6 +78,35 @@
      Remove an employee chip from its source cell
      ------------------------------------------------------------------ */
 
+  function setDropZoneLabel(text) {
+    const label = document.querySelector('#sidebar-drop-zone .drop-zone-label');
+    if (label) label.textContent = text;
+  }
+
+  /* ------------------------------------------------------------------
+     Availability overlay — highlights cells while an employee is being
+     dragged so the scheduler can see viable drops at a glance
+     ------------------------------------------------------------------ */
+
+  function showAvailabilityOverlay(employeeId) {
+    DB.getAvailability(employeeId).then((avail) => {
+      const slots = avail?.slots ?? {};
+      dragState.availSlots = slots;
+      document.querySelectorAll('.grid-cell').forEach((cell) => {
+        const state = slots[cell.dataset.cellKey] ?? 'available';
+        if (state === 'unavailable') cell.dataset.availDrag = 'unavailable';
+        else if (state === 'preferred') cell.dataset.availDrag = 'preferred';
+      });
+    });
+  }
+
+  function clearAvailabilityOverlay() {
+    document.querySelectorAll('[data-avail-drag]').forEach((cell) => {
+      delete cell.dataset.availDrag;
+    });
+    dragState.availSlots = null;
+  }
+
   function performRemove(employeeId, sourceCellKey) {
     if (!sourceCellKey) return;
 
@@ -92,6 +122,31 @@
 
       DB.setWeekShifts({ weekKey, cells, updatedAt: Date.now() }).then(() => {
         window.Grid.renderGrid();
+      });
+    });
+  }
+
+  function performRemoveAllCells(employeeId) {
+    const weekKey = window.Grid.getCurrentWeekKey();
+    DB.getWeekShifts(weekKey).then((weekShifts) => {
+      const cells = weekShifts?.cells ?? window.Grid.emptyWeekCells();
+
+      if (!dragState.preSnapshot) {
+        dragState.preSnapshot = snapshotCells(cells);
+      }
+
+      let removed = false;
+      Object.keys(cells).forEach((key) => {
+        const before = cells[key].length;
+        cells[key] = cells[key].filter((id) => id !== employeeId);
+        if (cells[key].length < before) removed = true;
+      });
+
+      if (!removed) return;
+
+      DB.setWeekShifts({ weekKey, cells, updatedAt: Date.now() }).then(() => {
+        window.Grid.renderGrid();
+        window.Export?.showToast?.('Removed from all shifts this week');
       });
     });
   }
@@ -134,21 +189,34 @@
     e.dataTransfer.setData('text/plain', chip.dataset.employeeId);
     e.dataTransfer.effectAllowed = 'move';
     chip.classList.add('drag-source');
+    setDropZoneLabel(
+      dragState.sourceCellKey ? 'Remove from this shift' : 'Remove from all shifts this week'
+    );
+    showAvailabilityOverlay(dragState.employeeId);
   }
 
   function onDragEnd(e) {
     e.currentTarget.classList.remove('drag-source');
     clearDragOverStyles();
+    clearAvailabilityOverlay();
     dragState.phase = 'idle';
+    setDropZoneLabel('Remove from schedule');
   }
 
   function onDragOver(e) {
+    const cellKey = e.currentTarget.dataset.cellKey;
+    if (dragState.availSlots?.[cellKey] === 'unavailable') {
+      e.dataTransfer.dropEffect = 'none';
+      clearDragOverStyles();
+      dragState.targetCellKey = null;
+      return;
+    }
     // REQUIRED: prevents browser default which blocks the drop event
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     clearDragOverStyles();
     e.currentTarget.classList.add('drag-over');
-    dragState.targetCellKey = e.currentTarget.dataset.cellKey;
+    dragState.targetCellKey = cellKey;
   }
 
   function onDragLeave(e) {
@@ -171,7 +239,11 @@
     e.preventDefault();
     clearDragOverStyles();
     const empId = e.dataTransfer.getData('text/plain');
-    performRemove(empId, dragState.sourceCellKey);
+    if (dragState.sourceCellKey) {
+      performRemove(empId, dragState.sourceCellKey);
+    } else {
+      performRemoveAllCells(empId);
+    }
     dragState.phase = 'idle';
   }
 
@@ -205,6 +277,10 @@
     dragState.employeeId = chip.dataset.employeeId;
     dragState.sourceCellKey = chip.dataset.sourceCellKey || null;
     dragState.preSnapshot = null;
+    setDropZoneLabel(
+      dragState.sourceCellKey ? 'Remove from this shift' : 'Remove from all shifts this week'
+    );
+    showAvailabilityOverlay(dragState.employeeId);
 
     // Create floating clone
     const rect = chip.getBoundingClientRect();
@@ -259,21 +335,34 @@
     dragState.touchCloneEl = null;
     clearDragOverStyles();
 
+    const savedSlots = dragState.availSlots;
+    clearAvailabilityOverlay();
+
     // Find final target
     const target = document.elementFromPoint(touch.clientX, touch.clientY);
     const cell = target?.closest('[data-cell-key]');
     const zone = target?.closest('#sidebar-drop-zone');
 
     if (cell) {
-      performDrop(dragState.employeeId, dragState.sourceCellKey, cell.dataset.cellKey);
+      if (savedSlots?.[cell.dataset.cellKey] === 'unavailable') {
+        announce('Cannot drop here — this slot is unavailable.');
+        window.Export?.showToast?.('Cannot schedule — employee is unavailable');
+      } else {
+        performDrop(dragState.employeeId, dragState.sourceCellKey, cell.dataset.cellKey);
+      }
     } else if (zone) {
-      performRemove(dragState.employeeId, dragState.sourceCellKey);
+      if (dragState.sourceCellKey) {
+        performRemove(dragState.employeeId, dragState.sourceCellKey);
+      } else {
+        performRemoveAllCells(dragState.employeeId);
+      }
     }
 
     dragState.phase = 'idle';
     dragState.employeeId = null;
     dragState.sourceCellKey = null;
     dragState.targetCellKey = null;
+    setDropZoneLabel('Remove from schedule');
   }
 
   /* ------------------------------------------------------------------
@@ -306,6 +395,7 @@
     dragState.targetCellKey = dragState.sourceCellKey;
 
     chip.classList.add('keyboard-active');
+    showAvailabilityOverlay(dragState.employeeId);
 
     const empName = chip.querySelector('.chip-name')?.textContent ?? 'employee';
     const location = dragState.sourceCellKey
@@ -324,6 +414,7 @@
     document.querySelectorAll('.keyboard-active').forEach((el) => {
       el.classList.remove('keyboard-active');
     });
+    clearAvailabilityOverlay();
     announce('Cancelled.');
   }
 
@@ -366,10 +457,16 @@
     if (dragState.phase !== 'keyboard_pickup') return;
     const { employeeId, sourceCellKey, targetCellKey } = dragState;
 
+    if (dragState.availSlots?.[targetCellKey] === 'unavailable') {
+      announce('This slot is unavailable — use arrow keys to navigate to another cell.');
+      return;
+    }
+
     clearDragOverStyles();
     document.querySelectorAll('.keyboard-active').forEach((el) => {
       el.classList.remove('keyboard-active');
     });
+    clearAvailabilityOverlay();
 
     dragState.phase = 'idle';
     dragState.employeeId = null;
@@ -479,6 +576,13 @@
   function init() {
     // Sidebar drop zone
     const zone = document.getElementById('sidebar-drop-zone');
+
+    const iconSlot = zone.querySelector('.drop-zone-icon');
+    if (iconSlot) {
+      const tpl = document.getElementById('icon-trash');
+      if (tpl) iconSlot.appendChild(tpl.content.cloneNode(true));
+    }
+
     zone.addEventListener('dragover', onSidebarDragOver);
     zone.addEventListener('dragleave', onSidebarDragLeave);
     zone.addEventListener('drop', onDropSidebar);

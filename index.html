@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Shiftboard</title>
+    <meta
+      name="description"
+      content="Shiftboard — browser-based employee scheduling. Drag-and-drop shifts, track availability, detect conflicts, and export weekly schedules."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <script src="js/fonts.js" defer></script>
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/grid.css" />
     <link rel="stylesheet" href="css/sidebar.css" />
@@ -237,6 +238,7 @@
             class="btn-icon"
             id="btn-add-employee"
             aria-label="Add employee"
+            title="Add employee"
             type="button"
           ></button>
         </header>
@@ -262,6 +264,7 @@
           id="sidebar-drop-zone"
           aria-label="Drop here to remove employee from schedule"
         >
+          <span class="drop-zone-icon" aria-hidden="true"></span>
           <span class="drop-zone-label" aria-hidden="true">Remove from schedule</span>
         </section>
 
@@ -282,6 +285,7 @@
               class="btn-icon"
               id="btn-prev-week"
               aria-label="Previous week"
+              title="Previous week"
               type="button"
             ></button>
             <h2 class="week-label" id="week-label" aria-live="polite" aria-atomic="true">
@@ -291,6 +295,7 @@
               class="btn-icon"
               id="btn-next-week"
               aria-label="Next week"
+              title="Next week"
               type="button"
             ></button>
           </div>
@@ -349,6 +354,7 @@
           <h2 id="modal-employee-title" class="modal-title">Add employee</h2>
           <button
             class="btn-icon modal-close"
+            title="Close"
             data-close-modal="modal-employee"
             aria-label="Close"
             type="button"
@@ -393,6 +399,7 @@
           <h2 id="modal-availability-title" class="modal-title">Set availability</h2>
           <button
             class="btn-icon modal-close"
+            title="Close"
             data-close-modal="modal-availability"
             aria-label="Close"
             type="button"
@@ -438,6 +445,7 @@
           <h2 id="modal-settings-title" class="modal-title">Settings</h2>
           <button
             class="btn-icon modal-close"
+            title="Close"
             data-close-modal="modal-settings"
             aria-label="Close"
             type="button"
@@ -466,6 +474,27 @@
             <button type="submit" class="btn-primary">Save settings</button>
           </div>
         </form>
+      </div>
+    </dialog>
+
+    <!-- Delete confirmation modal -->
+    <dialog id="modal-confirm" aria-labelledby="modal-confirm-title">
+      <div class="modal-inner">
+        <div class="modal-header">
+          <h2 id="modal-confirm-title" class="modal-title">Delete employee</h2>
+          <button
+            class="btn-icon modal-close"
+            title="Close"
+            data-close-modal="modal-confirm"
+            aria-label="Close"
+            type="button"
+          ></button>
+        </div>
+        <p id="modal-confirm-body" class="modal-confirm-body"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btn-confirm-cancel">Cancel</button>
+          <button type="button" class="btn-danger" id="btn-confirm-ok">Delete</button>
+        </div>
       </div>
     </dialog>
 

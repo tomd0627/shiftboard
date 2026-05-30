@@ -18,6 +18,7 @@ export default [
         idbKeyval: 'readonly',
         navigator: 'readonly',
         Promise: 'readonly',
+        requestAnimationFrame: 'readonly',
         Settings: 'readonly',
         setTimeout: 'readonly',
         window: 'readonly',

@@ -1,10 +1,13 @@
 (() => {
   const { createStore, get, set, del, entries } = idbKeyval;
 
-  const employeeStore = createStore('shiftboard-db', 'employees');
-  const availabilityStore = createStore('shiftboard-db', 'availability');
-  const shiftsStore = createStore('shiftboard-db', 'shifts');
-  const settingsStore = createStore('shiftboard-db', 'settings');
+  // Each store gets its own database — idb-keyval's createStore uses indexedDB.open()
+  // with version 1, so sharing one database name means only the first open request
+  // triggers upgradeneeded; the rest skip the upgrade and their stores are never created.
+  const employeeStore = createStore('shiftboard-employees', 'employees');
+  const availabilityStore = createStore('shiftboard-availability', 'availability');
+  const shiftsStore = createStore('shiftboard-shifts', 'shifts');
+  const settingsStore = createStore('shiftboard-settings', 'settings');
 
   /* ------------------------------------------------------------------
      ID generation

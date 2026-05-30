@@ -171,6 +171,7 @@
         cell.dataset.day = day.key;
         cell.dataset.block = block.key;
         cell.setAttribute('role', 'group');
+        cell.tabIndex = -1;
         cell.setAttribute(
           'aria-label',
           `${day.full} ${block.label} — ${empIds.length} employee${empIds.length !== 1 ? 's' : ''}`
@@ -244,6 +245,14 @@
     DB.getWeekShifts(weekKey).then((weekShifts) => {
       const cells = weekShifts?.cells ?? emptyWeekCells();
       DB.getAllEmployees().then((employees) => {
+        if (employees.length === 0) {
+          applyConflicts({ cells: {}, employees: {}, summary: [] });
+          window.Conflicts.renderConflictPanel(
+            { cells: {}, employees: {}, summary: [] },
+            employeeMap
+          );
+          return;
+        }
         const availPromises = employees.map((emp) =>
           DB.getAvailability(emp.id).then((avail) => [emp.id, avail])
         );

@@ -45,14 +45,17 @@
     const list = document.getElementById('employee-list');
     const searchVal = document.getElementById('employee-search').value.toLowerCase().trim();
     const emptyState = document.getElementById('empty-state');
+    const gridWrapper = document.querySelector('.grid-wrapper');
 
     DB.getAllEmployees().then((employees) => {
       if (employees.length === 0) {
         list.innerHTML = '';
         emptyState.hidden = false;
+        gridWrapper.hidden = true;
         return;
       }
       emptyState.hidden = true;
+      gridWrapper.hidden = false;
 
       const filtered = employees.filter((emp) => {
         if (!searchVal) return true;
@@ -109,6 +112,7 @@
         availBtn.type = 'button';
         availBtn.className = 'btn-icon';
         availBtn.setAttribute('aria-label', `Edit ${emp.name}'s availability`);
+        availBtn.title = `Edit ${emp.name}'s availability`;
         availBtn.dataset.action = 'availability';
         availBtn.dataset.employeeId = emp.id;
         availBtn.appendChild(getIcon('calendar'));
@@ -117,6 +121,7 @@
         editBtn.type = 'button';
         editBtn.className = 'btn-icon';
         editBtn.setAttribute('aria-label', `Edit ${emp.name}`);
+        editBtn.title = `Edit ${emp.name}`;
         editBtn.dataset.action = 'edit';
         editBtn.dataset.employeeId = emp.id;
         editBtn.appendChild(getIcon('pencil'));
@@ -125,6 +130,7 @@
         deleteBtn.type = 'button';
         deleteBtn.className = 'btn-icon';
         deleteBtn.setAttribute('aria-label', `Delete ${emp.name}`);
+        deleteBtn.title = `Delete ${emp.name}`;
         deleteBtn.dataset.action = 'delete';
         deleteBtn.dataset.employeeId = emp.id;
         deleteBtn.appendChild(getIcon('trash'));
@@ -204,20 +210,54 @@
   }
 
   /* ------------------------------------------------------------------
+     Styled confirmation dialog — returns a Promise<boolean>
+     ------------------------------------------------------------------ */
+
+  function showConfirm(message) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('modal-confirm');
+      document.getElementById('modal-confirm-body').textContent = message;
+
+      let result = false;
+      modal.addEventListener('close', () => resolve(result), { once: true });
+
+      // Clone buttons to remove any stale listeners from a previous call
+      const okBtn = document.getElementById('btn-confirm-ok');
+      const cancelBtn = document.getElementById('btn-confirm-cancel');
+      const newOk = okBtn.cloneNode(true);
+      const newCancel = cancelBtn.cloneNode(true);
+      okBtn.replaceWith(newOk);
+      cancelBtn.replaceWith(newCancel);
+
+      newOk.addEventListener('click', () => {
+        result = true;
+        modal.close();
+      });
+      newCancel.addEventListener('click', () => {
+        modal.close();
+      });
+
+      modal.showModal();
+      newCancel.focus();
+    });
+  }
+
+  /* ------------------------------------------------------------------
      Delete employee with confirmation
      ------------------------------------------------------------------ */
 
   function deleteEmployee(employeeId) {
     DB.getEmployee(employeeId).then((emp) => {
       if (!emp) return;
-      const confirmed = window.confirm(
-        `Delete ${emp.name}? They will be removed from all scheduled shifts.`
+      showConfirm(`Delete ${emp.name}? They will be removed from all scheduled shifts.`).then(
+        (confirmed) => {
+          if (!confirmed) return;
+          DB.deleteEmployee(employeeId).then(() => {
+            renderEmployeeList();
+            window.Grid?.renderGrid?.();
+          });
+        }
       );
-      if (!confirmed) return;
-      DB.deleteEmployee(employeeId).then(() => {
-        renderEmployeeList();
-        window.Grid?.renderGrid?.();
-      });
     });
   }
 

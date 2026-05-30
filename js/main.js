@@ -12,17 +12,10 @@
       bindWeekNavEvents();
       bindExportEvents();
 
-      // Restore last-viewed week, or default to current week
-      DB.getSetting('lastWeekKey').then((lastKey) => {
-        if (lastKey) {
-          const currentKey = Grid.getWeekKey(new Date());
-          Grid.setWeekOffset(weekKeyDiff(currentKey, lastKey));
-        }
-        // Initial render
-        Grid.renderGrid();
-        Employees.renderEmployeeList();
-        Drag.init();
-      });
+      // Initial render — always start on the current week
+      Grid.renderGrid();
+      Employees.renderEmployeeList();
+      Drag.init();
     });
   }
 
@@ -43,17 +36,6 @@
   function bindExportEvents() {
     document.getElementById('btn-copy-summary').addEventListener('click', Export.copyWeekSummary);
     document.getElementById('btn-print').addEventListener('click', Export.printSchedule);
-  }
-
-  /* ------------------------------------------------------------------
-     Calculate the offset (in weeks) between two week keys
-     ------------------------------------------------------------------ */
-
-  function weekKeyDiff(baseKey, targetKey) {
-    const baseMonday = Grid.weekKeyToMonday(baseKey);
-    const targetMonday = Grid.weekKeyToMonday(targetKey);
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    return Math.round((targetMonday - baseMonday) / msPerWeek);
   }
 
   /* ------------------------------------------------------------------
