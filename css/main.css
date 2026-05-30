@@ -21,7 +21,7 @@
   --color-structure: #1e293b;
 
   /* Accents */
-  --color-accent-teal: #0d9488;
+  --color-accent-teal: #0f766e; /* teal-700: 5.47:1 with white — teal-600 #0d9488 failed 4.5:1 */
   --color-accent-amber: #f59e0b;
   --color-accent-red: #ef4444;
 
@@ -221,7 +221,7 @@ dialog::backdrop {
 }
 
 .btn-primary:hover {
-  background-color: #0f766e;
+  background-color: #115e59;
 }
 
 .btn-secondary {

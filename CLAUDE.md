@@ -27,7 +27,7 @@ All tokens live in `css/main.css` as CSS custom properties:
 | `--color-structure` | `#1E293B` | Borders, structural elements |
 | `--color-text-primary` | `#1E293B` | Body text |
 | `--color-text-muted` | `#596070` | Secondary text — see note below |
-| `--color-accent-teal` | `#0D9488` | Confirmed/valid, focus rings |
+| `--color-accent-teal` | `#0F766E` | Confirmed/valid, focus rings — teal-700; teal-600 #0D9488 failed 4.5:1 with white text |
 | `--color-accent-amber` | `#F59E0B` | Warnings |
 | `--color-accent-red` | `#EF4444` | Errors/conflicts |
 | `--color-avail-bg` | `#D1FAE5` | Employee available highlight |
