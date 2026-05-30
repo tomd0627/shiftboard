@@ -51,7 +51,7 @@
   background-color: #f0fdfa;
   border-block-end-color: var(--color-accent-teal);
   border-block-end-width: 2px;
-  color: var(--color-accent-teal);
+  color: #0f766e; /* teal-700: 5.24:1 on #f0fdfa — accent-teal fails 4.5:1 here */
 }
 
 .grid-col-header .col-date {
