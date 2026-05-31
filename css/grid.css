@@ -269,3 +269,104 @@
   block-size: 10px;
   inline-size: 10px;
 }
+
+/* --------------------------------------------------------------------------
+   Mobile stacked view — day cards
+   -------------------------------------------------------------------------- */
+
+@media (width <= 767px) {
+  .schedule-grid--mobile {
+    border: none;
+    border-radius: 0;
+    display: block;
+    min-inline-size: unset;
+  }
+
+  .mobile-day-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .day-card {
+    background-color: var(--color-grid-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .day-card[data-today='true'] {
+    border-color: var(--color-accent-teal);
+  }
+
+  .day-card-header {
+    align-items: baseline;
+    background-color: var(--color-sidebar-surface);
+    border-block-end: 1px solid var(--color-border);
+    display: flex;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    gap: var(--space-2);
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .day-card-header[data-today='true'] {
+    background-color: #f0fdfa;
+    border-block-end-color: var(--color-accent-teal);
+    color: var(--color-accent-teal);
+  }
+
+  .day-card-date {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 400;
+  }
+
+  .day-card-header[data-today='true'] .day-card-date {
+    color: var(--color-accent-teal);
+  }
+
+  .day-card-rows {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .day-card-row {
+    border-block-end: 1px solid var(--color-border);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+  }
+
+  .day-card-row:last-child {
+    border-block-end: none;
+  }
+
+  .day-card-block-label {
+    align-items: center;
+    background-color: var(--color-sidebar-surface);
+    border-inline-end: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    display: flex;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    justify-content: flex-end;
+    letter-spacing: 0.05em;
+    padding: var(--space-2) var(--space-3);
+    text-transform: uppercase;
+  }
+
+  /* grid-cell inside day-card: remove right border, normalize */
+  .day-card .grid-cell {
+    border-block-end: none;
+    border-inline-end: none;
+    min-block-size: 64px;
+  }
+
+  /* today column inside day-card: use top border instead of left border */
+  .day-card[data-today='true'] .grid-cell[data-today='true'] {
+    background-color: #f0fdfa;
+    border-inline-start: 2px solid var(--color-accent-teal);
+  }
+}

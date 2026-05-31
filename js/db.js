@@ -96,11 +96,13 @@
     return Promise.all([
       getSetting('minHeadcount'),
       getSetting('weekStart'),
+      getSetting('showWeekends'),
       getSetting('lastWeekKey'),
-    ]).then(([minHeadcount, weekStart, lastWeekKey]) => ({
+    ]).then(([minHeadcount, weekStart, showWeekends, lastWeekKey]) => ({
       minHeadcount: minHeadcount !== undefined ? minHeadcount : 1,
-      weekStart: weekStart !== undefined ? weekStart : 'mon',
       lastWeekKey,
+      showWeekends: showWeekends !== undefined ? showWeekends : true,
+      weekStart: weekStart !== undefined ? weekStart : 'mon',
     }));
   }
 
@@ -112,6 +114,10 @@
       .then(() => getSetting('weekStart'))
       .then((val) => {
         if (val === undefined) return setSetting('weekStart', 'mon');
+      })
+      .then(() => getSetting('showWeekends'))
+      .then((val) => {
+        if (val === undefined) return setSetting('showWeekends', true);
       });
   }
 

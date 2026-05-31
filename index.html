@@ -205,6 +205,20 @@
         />
       </svg>
     </template>
+    <template id="icon-bars-3">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M3 6.75A.75.75 0 0 1 3.75 6h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 6.75ZM3 12a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm0 5.25a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </template>
     <template id="icon-x-mark">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -229,11 +243,14 @@
     <!-- Toast notification -->
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
+    <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+    <h1 class="sr-only">Shiftboard</h1>
     <div class="app-shell">
       <!-- Sidebar -->
       <aside class="sidebar" aria-label="Employees and settings">
         <header class="sidebar-header">
-          <h1 class="app-title">Shiftboard</h1>
+          <h2 class="sidebar-section-label">Employees</h2>
           <button
             class="btn-icon"
             id="btn-add-employee"
@@ -281,6 +298,13 @@
         <!-- Week navigation header -->
         <header class="week-header">
           <div class="week-nav">
+            <button
+              class="btn-icon mobile-menu-btn"
+              id="btn-mobile-menu"
+              aria-label="Open staff panel"
+              title="Staff"
+              type="button"
+            ></button>
             <button
               class="btn-icon"
               id="btn-prev-week"
@@ -338,11 +362,6 @@
           <button class="btn-primary" id="btn-add-employee-empty" type="button">
             Add employee
           </button>
-        </div>
-
-        <!-- Narrow viewport message -->
-        <div class="narrow-message" aria-live="polite" role="status" hidden>
-          <p>Schedule management requires a wider screen (768px or wider).</p>
         </div>
       </main>
     </div>
@@ -466,6 +485,17 @@
             <span class="field-hint"
               >Shifts with fewer employees than this will show a warning.</span
             >
+          </div>
+          <div class="form-field">
+            <label for="field-week-start">Week starts on</label>
+            <select id="field-week-start" name="weekStart">
+              <option value="mon">Monday</option>
+              <option value="sun">Sunday</option>
+            </select>
+          </div>
+          <div class="form-field form-field--row">
+            <input type="checkbox" id="field-show-weekends" name="showWeekends" checked />
+            <label for="field-show-weekends">Show weekends</label>
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-secondary" data-close-modal="modal-settings">

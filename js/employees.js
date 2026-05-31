@@ -510,6 +510,9 @@
     const printIconEl = document.querySelector('#btn-print .btn-icon-inline');
     if (printIconEl) printIconEl.appendChild(getIcon('printer'));
 
+    // Mobile menu icon
+    document.getElementById('btn-mobile-menu')?.appendChild(getIcon('bars-3'));
+
     // Navigation icons
     document.getElementById('btn-prev-week')?.appendChild(getIcon('chevron-left'));
     document.getElementById('btn-next-week')?.appendChild(getIcon('chevron-right'));

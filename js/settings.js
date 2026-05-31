@@ -4,8 +4,10 @@
      ------------------------------------------------------------------ */
 
   function openSettingsModal() {
-    DB.getSetting('minHeadcount').then((val) => {
-      document.getElementById('field-min-headcount').value = val ?? 1;
+    DB.getSettings().then((settings) => {
+      document.getElementById('field-min-headcount').value = settings.minHeadcount ?? 1;
+      document.getElementById('field-week-start').value = settings.weekStart ?? 'mon';
+      document.getElementById('field-show-weekends').checked = settings.showWeekends !== false;
       document.getElementById('modal-settings').showModal();
       document.getElementById('field-min-headcount').focus();
     });
@@ -19,10 +21,16 @@
     e.preventDefault();
     const minVal = parseInt(document.getElementById('field-min-headcount').value, 10);
     const minHeadcount = Number.isNaN(minVal) || minVal < 0 ? 1 : minVal;
+    const weekStart = document.getElementById('field-week-start').value;
+    const showWeekends = document.getElementById('field-show-weekends').checked;
 
-    DB.setSetting('minHeadcount', minHeadcount).then(() => {
+    Promise.all([
+      DB.setSetting('minHeadcount', minHeadcount),
+      DB.setSetting('weekStart', weekStart),
+      DB.setSetting('showWeekends', showWeekends),
+    ]).then(() => {
       closeModal('modal-settings');
-      window.Grid?.runConflicts?.();
+      window.Grid?.renderGrid?.();
     });
   }
 

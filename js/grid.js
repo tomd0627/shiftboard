@@ -1,12 +1,13 @@
 (() => {
-  const DAYS = [
-    { key: 'mon', label: 'Mon', full: 'Monday' },
-    { key: 'tue', label: 'Tue', full: 'Tuesday' },
-    { key: 'wed', label: 'Wed', full: 'Wednesday' },
-    { key: 'thu', label: 'Thu', full: 'Thursday' },
-    { key: 'fri', label: 'Fri', full: 'Friday' },
-    { key: 'sat', label: 'Sat', full: 'Saturday' },
-    { key: 'sun', label: 'Sun', full: 'Sunday' },
+  // All days with their fixed offset from the ISO Monday (mon=0 … sat=5, sun=6)
+  const ALL_DAYS = [
+    { key: 'mon', label: 'Mon', full: 'Monday', offset: 0 },
+    { key: 'tue', label: 'Tue', full: 'Tuesday', offset: 1 },
+    { key: 'wed', label: 'Wed', full: 'Wednesday', offset: 2 },
+    { key: 'thu', label: 'Thu', full: 'Thursday', offset: 3 },
+    { key: 'fri', label: 'Fri', full: 'Friday', offset: 4 },
+    { key: 'sat', label: 'Sat', full: 'Saturday', offset: 5 },
+    { key: 'sun', label: 'Sun', full: 'Sunday', offset: 6 },
   ];
 
   const BLOCKS = [
@@ -18,6 +19,32 @@
   // Module state
   let currentWeekOffset = 0;
   let employeeMap = new Map();
+
+  // Last rendered settings — used by ResizeObserver to re-render with same settings
+  let lastSettings = { weekStart: 'mon', showWeekends: true };
+
+  /* ------------------------------------------------------------------
+     Active days — ordered and filtered by settings
+     ------------------------------------------------------------------ */
+
+  function getActiveDays(weekStart, showWeekends) {
+    // Determine display order
+    let ordered;
+    if (weekStart === 'sun') {
+      // Sun first, with offset -1 (the day before the ISO Monday)
+      const sun = { key: 'sun', label: 'Sun', full: 'Sunday', offset: -1 };
+      const weekdays = ALL_DAYS.filter((d) => d.key !== 'sun');
+      ordered = [sun, ...weekdays];
+    } else {
+      ordered = ALL_DAYS.slice();
+    }
+
+    if (!showWeekends) {
+      ordered = ordered.filter((d) => d.key !== 'sat' && d.key !== 'sun');
+    }
+
+    return ordered;
+  }
 
   /* ------------------------------------------------------------------
      Week key utilities (ISO 8601 week numbers)
@@ -50,10 +77,16 @@
     return getWeekKey(monday);
   }
 
-  function formatWeekLabel(weekKey) {
+  function formatWeekLabel(weekKey, activeDays) {
     const monday = weekKeyToMonday(weekKey);
-    const sunday = new Date(monday);
-    sunday.setUTCDate(monday.getUTCDate() + 6);
+
+    const firstOffset = activeDays[0].offset;
+    const lastOffset = activeDays[activeDays.length - 1].offset;
+
+    const firstDate = new Date(monday);
+    firstDate.setUTCDate(monday.getUTCDate() + firstOffset);
+    const lastDate = new Date(monday);
+    lastDate.setUTCDate(monday.getUTCDate() + lastOffset);
 
     const fmt = (d) =>
       d.toLocaleDateString('en-US', {
@@ -62,10 +95,10 @@
         timeZone: 'UTC',
       });
 
-    if (monday.getUTCFullYear() !== sunday.getUTCFullYear()) {
-      return `${fmt(monday)}, ${monday.getUTCFullYear()} – ${fmt(sunday)}, ${sunday.getUTCFullYear()}`;
+    if (firstDate.getUTCFullYear() !== lastDate.getUTCFullYear()) {
+      return `${fmt(firstDate)}, ${firstDate.getUTCFullYear()} – ${fmt(lastDate)}, ${lastDate.getUTCFullYear()}`;
     }
-    return `${fmt(monday)} – ${fmt(sunday)}, ${sunday.getUTCFullYear()}`;
+    return `${fmt(firstDate)} – ${fmt(lastDate)}, ${lastDate.getUTCFullYear()}`;
   }
 
   function getCurrentWeekKey() {
@@ -75,7 +108,7 @@
 
   function emptyWeekCells() {
     const cells = {};
-    DAYS.forEach((day) => {
+    ALL_DAYS.forEach((day) => {
       BLOCKS.forEach((block) => {
         cells[`${day.key}_${block.key}`] = [];
       });
@@ -94,30 +127,42 @@
     const todayDayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][today.getDay()];
     const isCurrentWeek = weekKey === todayWeekKey;
 
-    // Fetch employees and week data in parallel
-    Promise.all([DB.getAllEmployees(), DB.getWeekShifts(weekKey)]).then(
-      ([employees, weekShifts]) => {
-        // Build employee lookup map
-        employeeMap = new Map(employees.map((emp) => [emp.id, emp]));
+    Promise.all([
+      DB.getAllEmployees(),
+      DB.getWeekShifts(weekKey),
+      DB.getSetting('weekStart'),
+      DB.getSetting('showWeekends'),
+    ]).then(([employees, weekShifts, weekStart, showWeekends]) => {
+      const ws = weekStart ?? 'mon';
+      const sw = showWeekends !== undefined ? showWeekends : true;
+      lastSettings = { weekStart: ws, showWeekends: sw };
 
-        const cells = weekShifts?.cells ?? emptyWeekCells();
+      employeeMap = new Map(employees.map((emp) => [emp.id, emp]));
+      const cells = weekShifts?.cells ?? emptyWeekCells();
+      const monday = weekKeyToMonday(weekKey);
+      const activeDays = getActiveDays(ws, sw);
 
-        // Build week start date for column headers
-        const monday = weekKeyToMonday(weekKey);
+      updateWeekLabel(weekKey, activeDays);
+      DB.setSetting('lastWeekKey', weekKey);
 
-        buildGridDOM(cells, monday, isCurrentWeek, todayDayKey);
-        updateWeekLabel(weekKey);
-        DB.setSetting('lastWeekKey', weekKey);
+      // Keep Grid.DAYS in sync so drag.js CELL_KEYS rebuild uses active days
+      if (window.Grid) window.Grid.DAYS = activeDays;
 
-        // Run conflict detection after render
-        runConflicts();
+      if (window.innerWidth < 768) {
+        buildMobileGridDOM(cells, monday, isCurrentWeek, todayDayKey, today, activeDays);
+      } else {
+        buildGridDOM(cells, monday, isCurrentWeek, todayDayKey, today, activeDays);
       }
-    );
+
+      runConflicts(activeDays);
+    });
   }
 
-  function buildGridDOM(cells, monday, isCurrentWeek, todayDayKey) {
+  function buildGridDOM(cells, monday, isCurrentWeek, todayDayKey, today, activeDays) {
     const grid = document.getElementById('schedule-grid');
     grid.innerHTML = '';
+    grid.className = 'schedule-grid';
+    grid.style.gridTemplateColumns = `100px repeat(${activeDays.length}, minmax(100px, 1fr))`;
 
     // Top-left corner cell
     const cornerCell = document.createElement('div');
@@ -126,10 +171,18 @@
     grid.appendChild(cornerCell);
 
     // Day column headers
-    DAYS.forEach((day, i) => {
+    activeDays.forEach((day) => {
       const colDate = new Date(monday);
-      colDate.setUTCDate(monday.getUTCDate() + i);
-      const isToday = isCurrentWeek && day.key === todayDayKey;
+      colDate.setUTCDate(monday.getUTCDate() + day.offset);
+
+      // Today: same day-of-week key AND same calendar date
+      const isToday =
+        isCurrentWeek &&
+        day.key === todayDayKey &&
+        colDate.toUTCString().slice(0, 16) ===
+          new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+            .toUTCString()
+            .slice(0, 16);
 
       const header = document.createElement('div');
       header.className = 'grid-col-header';
@@ -160,47 +213,133 @@
       rowHeader.setAttribute('aria-hidden', 'true');
       grid.appendChild(rowHeader);
 
-      DAYS.forEach((day) => {
-        const cellKey = `${day.key}_${block.key}`;
-        const empIds = cells[cellKey] ?? [];
-        const isToday = isCurrentWeek && day.key === todayDayKey;
+      activeDays.forEach((day) => {
+        const colDate = new Date(monday);
+        colDate.setUTCDate(monday.getUTCDate() + day.offset);
 
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        cell.dataset.cellKey = cellKey;
-        cell.dataset.day = day.key;
-        cell.dataset.block = block.key;
-        cell.setAttribute('role', 'group');
-        cell.tabIndex = -1;
-        cell.setAttribute(
-          'aria-label',
-          `${day.full} ${block.label} — ${empIds.length} employee${empIds.length !== 1 ? 's' : ''}`
-        );
-        if (isToday) cell.dataset.today = 'true';
+        const isToday =
+          isCurrentWeek &&
+          day.key === todayDayKey &&
+          colDate.toUTCString().slice(0, 16) ===
+            new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+              .toUTCString()
+              .slice(0, 16);
 
-        // Conflict badge placeholder
-        const badge = document.createElement('div');
-        badge.className = 'cell-conflict-badge';
-        badge.setAttribute('aria-hidden', 'true');
-        cell.appendChild(badge);
-
-        // Employee chips
-        const chipsContainer = document.createElement('div');
-        chipsContainer.className = 'cell-chips';
-
-        empIds.forEach((empId) => {
-          const emp = employeeMap.get(empId);
-          if (!emp) return;
-          chipsContainer.appendChild(buildChip(emp, cellKey));
-        });
-
-        cell.appendChild(chipsContainer);
-        grid.appendChild(cell);
+        grid.appendChild(buildCell(cells, day, block, isToday));
       });
     });
 
-    // Attach drag listeners to the newly built DOM
+    // Last column: remove right border — reapply since column count is dynamic
+    grid.querySelectorAll('.grid-cell').forEach((cell, i) => {
+      const colPos = (i % activeDays.length) + 1;
+      cell.style.borderInlineEnd = colPos === activeDays.length ? 'none' : '';
+    });
+
     window.Drag?.attachListeners?.();
+  }
+
+  function buildMobileGridDOM(cells, monday, isCurrentWeek, todayDayKey, today, activeDays) {
+    const grid = document.getElementById('schedule-grid');
+    grid.innerHTML = '';
+    grid.className = 'schedule-grid schedule-grid--mobile';
+    grid.style.gridTemplateColumns = '';
+
+    const stack = document.createElement('div');
+    stack.className = 'mobile-day-stack';
+
+    activeDays.forEach((day) => {
+      const colDate = new Date(monday);
+      colDate.setUTCDate(monday.getUTCDate() + day.offset);
+
+      const isToday =
+        isCurrentWeek &&
+        day.key === todayDayKey &&
+        colDate.toUTCString().slice(0, 16) ===
+          new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+            .toUTCString()
+            .slice(0, 16);
+
+      const card = document.createElement('section');
+      card.className = 'day-card';
+      if (isToday) card.dataset.today = 'true';
+
+      const cardHeader = document.createElement('h3');
+      cardHeader.className = 'day-card-header';
+      if (isToday) cardHeader.dataset.today = 'true';
+
+      const dayNameSpan = document.createElement('span');
+      dayNameSpan.textContent = day.full;
+
+      const dateSpan = document.createElement('span');
+      dateSpan.className = 'day-card-date';
+      dateSpan.textContent = colDate.toLocaleDateString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        timeZone: 'UTC',
+      });
+
+      cardHeader.appendChild(dayNameSpan);
+      cardHeader.appendChild(dateSpan);
+      card.appendChild(cardHeader);
+
+      const rows = document.createElement('div');
+      rows.className = 'day-card-rows';
+
+      BLOCKS.forEach((block) => {
+        const row = document.createElement('div');
+        row.className = 'day-card-row';
+
+        const blockLabel = document.createElement('span');
+        blockLabel.className = 'day-card-block-label';
+        blockLabel.textContent = block.key === 'afternoon' ? 'Aftn.' : block.label;
+        blockLabel.setAttribute('aria-hidden', 'true');
+
+        row.appendChild(blockLabel);
+        row.appendChild(buildCell(cells, day, block, isToday));
+        rows.appendChild(row);
+      });
+
+      card.appendChild(rows);
+      stack.appendChild(card);
+    });
+
+    grid.appendChild(stack);
+    window.Drag?.attachListeners?.();
+  }
+
+  function buildCell(cells, day, block, isToday) {
+    const cellKey = `${day.key}_${block.key}`;
+    const empIds = cells[cellKey] ?? [];
+
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    cell.dataset.cellKey = cellKey;
+    cell.dataset.day = day.key;
+    cell.dataset.block = block.key;
+    cell.setAttribute('role', 'group');
+    cell.tabIndex = -1;
+    cell.setAttribute(
+      'aria-label',
+      `${day.full} ${block.label} — ${empIds.length} employee${empIds.length !== 1 ? 's' : ''}`
+    );
+    if (isToday) cell.dataset.today = 'true';
+
+    const badge = document.createElement('div');
+    badge.className = 'cell-conflict-badge';
+    badge.setAttribute('aria-hidden', 'true');
+    cell.appendChild(badge);
+
+    const chipsContainer = document.createElement('div');
+    chipsContainer.className = 'cell-chips';
+
+    empIds.forEach((empId) => {
+      const emp = employeeMap.get(empId);
+      if (!emp) return;
+      chipsContainer.appendChild(buildChip(emp, cellKey));
+    });
+
+    cell.appendChild(chipsContainer);
+    return cell;
   }
 
   function buildChip(emp, sourceCellKey) {
@@ -230,18 +369,23 @@
     return chip;
   }
 
-  function updateWeekLabel(weekKey) {
-    document.getElementById('week-label').textContent = formatWeekLabel(weekKey);
-    document.title = `Shiftboard — ${formatWeekLabel(weekKey)}`;
+  function updateWeekLabel(weekKey, activeDays) {
+    const label = formatWeekLabel(weekKey, activeDays);
+    document.getElementById('week-label').textContent = label;
+    document.title = `Shiftboard — ${label}`;
   }
 
   /* ------------------------------------------------------------------
      Conflict detection integration
      ------------------------------------------------------------------ */
 
-  function runConflicts() {
+  function runConflicts(activeDays) {
     if (!window.Conflicts) return;
     const weekKey = getCurrentWeekKey();
+    const activeDayKeys = activeDays
+      ? activeDays.flatMap((d) => BLOCKS.map((b) => `${d.key}_${b.key}`))
+      : null;
+
     DB.getWeekShifts(weekKey).then((weekShifts) => {
       const cells = weekShifts?.cells ?? emptyWeekCells();
       DB.getAllEmployees().then((employees) => {
@@ -266,7 +410,8 @@
             const conflictMap = window.Conflicts.detectConflicts(
               cells,
               availabilityMap,
-              minHeadcount
+              minHeadcount,
+              activeDayKeys
             );
             applyConflicts(conflictMap);
             window.Conflicts.renderConflictPanel(conflictMap, employeeMap);
@@ -277,14 +422,12 @@
   }
 
   function applyConflicts(conflictMap) {
-    // Clear previous conflict states
     document.querySelectorAll('.grid-cell').forEach((cell) => {
       cell.classList.remove('conflict-error', 'conflict-warning');
       const badge = cell.querySelector('.cell-conflict-badge');
       if (badge) badge.innerHTML = '';
     });
 
-    // Apply cell-level conflicts
     Object.entries(conflictMap.cells).forEach(([cellKey, conflicts]) => {
       const cell = document.querySelector(`[data-cell-key="${cellKey}"]`);
       if (!cell || conflicts.length === 0) return;
@@ -300,7 +443,6 @@
       }
     });
 
-    // Apply employee-level conflicts
     Object.entries(conflictMap.employees).forEach(([, conflicts]) => {
       conflicts.forEach((conflict) => {
         const cell = document.querySelector(`[data-cell-key="${conflict.cellKey}"]`);
@@ -333,6 +475,10 @@
 
   function goToCurrentWeek() {
     currentWeekOffset = 0;
+    // Sun-start edge case: if today is Sunday, it belongs to the NEXT display week
+    if (lastSettings.weekStart === 'sun' && new Date().getDay() === 0) {
+      currentWeekOffset = 1;
+    }
     renderGrid();
   }
 
@@ -341,15 +487,30 @@
   }
 
   /* ------------------------------------------------------------------
+     Resize: re-render when crossing the mobile/desktop breakpoint
+     ------------------------------------------------------------------ */
+
+  let lastMobile = window.innerWidth < 768;
+  new ResizeObserver(() => {
+    const nowMobile = window.innerWidth < 768;
+    if (nowMobile !== lastMobile) {
+      lastMobile = nowMobile;
+      renderGrid();
+    }
+  }).observe(document.body);
+
+  /* ------------------------------------------------------------------
      Expose as window.Grid
      ------------------------------------------------------------------ */
 
   window.Grid = {
+    ALL_DAYS,
     applyConflicts,
     BLOCKS,
     buildChip,
-    DAYS,
+    DAYS: ALL_DAYS, // mutable: updated to active days after each renderGrid
     emptyWeekCells,
+    getActiveDays,
     getCurrentWeekKey,
     getWeekKey,
     goToCurrentWeek,

@@ -389,8 +389,19 @@ dialog::backdrop {
   font-weight: 500;
 }
 
+.form-field--row {
+  align-items: center;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.form-field--row label {
+  margin-block-end: 0;
+}
+
 .form-field input[type='text'],
-.form-field input[type='number'] {
+.form-field input[type='number'],
+.form-field select {
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -399,7 +410,8 @@ dialog::backdrop {
 }
 
 .form-field input[type='text']:focus,
-.form-field input[type='number']:focus {
+.form-field input[type='number']:focus,
+.form-field select:focus {
   border-color: var(--color-accent-teal);
   outline: none;
 }
@@ -499,16 +511,29 @@ dialog::backdrop {
 }
 
 /* --------------------------------------------------------------------------
-   Narrow viewport message
+   Mobile menu button — hidden on desktop, shown in mobile media query
    -------------------------------------------------------------------------- */
 
-.narrow-message {
-  align-items: center;
+.mobile-menu-btn {
   display: none;
-  font-size: var(--font-size-base);
-  justify-content: center;
-  padding: var(--space-6);
-  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar backdrop — mobile drawer overlay
+   -------------------------------------------------------------------------- */
+
+.sidebar-backdrop {
+  background: rgb(0 0 0 / 40%);
+  block-size: 100%;
+  inline-size: 100%;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  position: fixed;
+  z-index: 199;
+}
+
+.sidebar-backdrop[hidden] {
+  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -624,15 +649,7 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 
-  .grid-wrapper,
-  .week-header,
-  .conflict-panel,
-  .empty-state,
-  #schedule-grid {
-    display: none !important;
-  }
-
-  .narrow-message {
-    display: flex;
+  .mobile-menu-btn {
+    display: inline-flex;
   }
 }

@@ -27,11 +27,17 @@
   padding: var(--space-4);
 }
 
-.app-title {
+.sidebar-section-label {
   color: var(--color-text-primary);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#btn-add-employee {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -131,6 +137,12 @@
   inline-size: 14px;
 }
 
+@media (hover: none) {
+  .employee-actions {
+    opacity: 1;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Sidebar drop zone — drag employee chips here to remove from schedule
    -------------------------------------------------------------------------- */
@@ -207,11 +219,22 @@
 }
 
 /* --------------------------------------------------------------------------
-   Responsive — narrow viewport
+   Responsive — mobile drawer
    -------------------------------------------------------------------------- */
 
 @media (width <= 767px) {
   .sidebar {
-    display: none;
+    block-size: 100%;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    position: fixed;
+    transform: translateX(-100%);
+    transition: transform 200ms ease;
+    width: var(--sidebar-width);
+    z-index: 200;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
   }
 }

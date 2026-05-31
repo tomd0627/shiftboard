@@ -19,6 +19,7 @@ export default [
         navigator: 'readonly',
         Promise: 'readonly',
         requestAnimationFrame: 'readonly',
+        ResizeObserver: 'readonly',
         Settings: 'readonly',
         setTimeout: 'readonly',
         window: 'readonly',

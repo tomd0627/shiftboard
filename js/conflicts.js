@@ -1,23 +1,30 @@
 (() => {
-  const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  const ALL_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
   const BLOCKS = ['morning', 'afternoon', 'evening'];
-  const ALL_CELL_KEYS = DAYS.flatMap((day) => BLOCKS.map((block) => `${day}_${block}`));
+  const ALL_CELL_KEYS = ALL_DAYS.flatMap((day) => BLOCKS.map((block) => `${day}_${block}`));
 
   /* ------------------------------------------------------------------
      Pure conflict detection — no DOM access, no async
      ------------------------------------------------------------------ */
 
-  function detectConflicts(weekCells, availabilityMap, minHeadcount) {
+  // activeDayKeys: optional array of cell keys for visible days only.
+  // When provided, conflict rules are scoped to those cells so hidden
+  // days (e.g. weekends) never produce phantom panel items.
+  function detectConflicts(weekCells, availabilityMap, minHeadcount, activeDayKeys) {
+    const activeKeys = activeDayKeys ?? ALL_CELL_KEYS;
     const result = {
       cells: {},
       employees: {},
       summary: [],
     };
 
+    const activeKeySet = new Set(activeKeys);
+
     // Rule 1: Double-booking — same employee in the same cell key more than once
     // (data integrity guard; prevented by performDrop dedup but caught here too)
     const empCells = {};
     Object.entries(weekCells).forEach(([cellKey, empIds]) => {
+      if (!activeKeySet.has(cellKey)) return;
       const seen = new Set();
       empIds.forEach((eid) => {
         if (seen.has(eid)) {
@@ -37,6 +44,7 @@
 
     // Rule 2: Availability violation — employee scheduled in an Unavailable slot
     Object.entries(weekCells).forEach(([cellKey, empIds]) => {
+      if (!activeKeySet.has(cellKey)) return;
       empIds.forEach((eid) => {
         const avail = availabilityMap[eid];
         if (avail?.slots?.[cellKey] === 'unavailable') {
@@ -51,9 +59,9 @@
       });
     });
 
-    // Rule 3: Understaffed — fewer employees than minHeadcount
+    // Rule 3: Understaffed — fewer employees than minHeadcount (active days only)
     if (minHeadcount > 0) {
-      ALL_CELL_KEYS.forEach((cellKey) => {
+      activeKeys.forEach((cellKey) => {
         const count = (weekCells[cellKey] ?? []).length;
         if (count < minHeadcount) {
           addCellConflict(result, {
