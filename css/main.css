@@ -652,4 +652,16 @@ dialog::backdrop {
   .mobile-menu-btn {
     display: inline-flex;
   }
+
+  .week-header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .week-label {
+    min-inline-size: 0;
+  }
+
+  .btn-mobile-hide {
+    display: none;
+  }
 }
