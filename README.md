@@ -1,16 +1,17 @@
 # Shiftboard
 
-A manager-facing shift scheduling tool. Build a weekly schedule by dragging employees into time slots across a 7-day grid. Employees can mark their availability preferences, and the system flags conflicts — double-booking, understaffed shifts, availability violations — in real time.
+A shift scheduling tool built for two use cases: managers build and edit the weekly schedule on desktop; employees check assignments and make small adjustments on mobile. Build a schedule by dragging employees into time slots across a configurable grid. Employees can mark their availability preferences, and the system flags conflicts — double-booking, understaffed shifts, availability violations — in real time.
 
 ## Features
 
-- **Weekly schedule grid** — 7-column (Mon–Sun) × 3-row (Morning / Afternoon / Evening) drag-and-drop grid
+- **Weekly schedule grid** — Up to 7-column × 3-row (Morning / Afternoon / Evening) drag-and-drop grid; configurable week start (Mon/Sun) and optional weekend columns
+- **Mobile view** — Below 768 px the grid reflows to a vertical day-card stack; sidebar becomes a slide-in drawer for employee management
 - **Employee management** — Add, edit, and delete employees with color-coded chips and role/title labels
 - **Availability preferences** — Per-employee 7×3 matrix with Available / Preferred / Unavailable states
-- **Real-time conflict detection** — Double-booking, availability violations, and understaffed shifts flagged instantly
+- **Real-time conflict detection** — Double-booking, availability violations, and understaffed shifts flagged instantly; scoped to visible days only
 - **Keyboard drag alternative** — Full keyboard operation: pick up chips with Enter, navigate with arrow keys, drop with Enter, cancel with Escape
 - **Undo** — Ctrl/Cmd+Z reverses the last drag operation
-- **Export** — Copy week summary to clipboard as plain text; print-optimised B&W view
+- **Export** — Copy week summary to clipboard as plain text (respects active day order and weekend visibility); print-optimised B&W view
 - **Local-first** — All data stored in IndexedDB; no backend, no account required
 
 ## Tech stack
@@ -58,7 +59,7 @@ All data is stored client-side in IndexedDB (`shiftboard-db`):
 | `employees` | `employeeId` | Name, role, color |
 | `availability` | `employeeId` | 21-slot weekly matrix |
 | `shifts` | `weekKey` (ISO, e.g. `2026-W22`) | All employee assignments for the week |
-| `settings` | string keys | `minHeadcount`, `weekStart`, `lastWeekKey` |
+| `settings` | string keys | `minHeadcount`, `weekStart`, `showWeekends`, `lastWeekKey` |
 
 Data survives page reloads but is browser-local. There is no sync or backup.
 
